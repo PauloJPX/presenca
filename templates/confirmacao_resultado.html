@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% block title %}Presença Registrada{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    {% if confirmado %}
+        <h3 class="text-success">Obrigado {{ nome }}, sua presença foi confirmada com sucesso!</h3>
+    {% else %}
+        <h3 class="text-muted">Entendemos, {{ nome }}. Esperamos vê-lo em uma próxima oportunidade!</h3>
+    {% endif %}
+</div>
+{% endblock %}

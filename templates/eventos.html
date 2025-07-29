@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block title %}Meus Eventos{% endblock %}
+
+{% block content %}
+<h2 class="text-center">Olá, {{ nome }}!</h2>
+
+{% if eventos %}
+    <p class="text-center">Escolha um evento para gerenciar:</p>
+    <div class="row justify-content-center">
+        {% for evento in eventos %}
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h5>{{ evento.nome_evento }}</h5>
+                    <p>Data: {{ evento.data_evento }}</p>
+
+                    <div class="d-flex justify-content-center gap-2 mt-3">
+                        <a href="{{ url_for('convidados.painel_evento', evento_id=evento.id) }}" class="btn btn-primary btn-sm">Acessar</a>
+
+                        <form method="post"
+                              action="{{ url_for('eventos.excluir_evento', evento_id=evento.id) }}"
+                              onsubmit="return confirm('Tem certeza que deseja excluir este evento?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center mt-4">
+        Você ainda não criou nenhum evento.
+        <hr>
+        <hr>
+        <a href="{{ url_for('eventos.criar_evento') }}" class="btn btn-success">Criar Novo Evento</a>
+    </div>
+{% endif %}
+
+
+<div class="text-center mt-3">
+    {% if tipo_plano == 'super' %}
+        <a href="{{ url_for('eventos.criar_evento') }}" class="btn btn-success">Criar Novo Evento</a>
+    {% endif %}
+</div>
+
+{% endblock %}

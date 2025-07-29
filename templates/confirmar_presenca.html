@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Confirmar Presença{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2>Olá {{ convidado.nome }}!</h2>
+    <p>Você foi convidado para o evento <strong>{{ evento.nome_evento }}</strong>.</p>
+
+    {% if evento.convite_path %}
+        <div class="my-4">
+            <h5>Convite:</h5>
+            <img src="{{ url_for('static', filename=evento.convite_path) }}" class="img-fluid" style="max-height: 400px;">
+        </div>
+    {% endif %}
+
+    <form method="post" class="mt-4">
+        <p>Você confirma sua presença?</p>
+        <div class="d-flex justify-content-center gap-3">
+            <button name="confirmacao" value="sim" type="submit" class="btn btn-success">Sim, Confirmo</button>
+            <button name="confirmacao" value="nao" type="submit" class="btn btn-danger">Não Poderei Ir</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

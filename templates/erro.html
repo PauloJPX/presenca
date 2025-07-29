@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block title %}Erro{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger text-center mt-5">
+    <h4>Erro</h4>
+    <p>{{ mensagem }}</p>
+    <a href="{{ url_for('eventos.listar_eventos') }}" class="btn btn-primary mt-3">Voltar</a>
+
+</div>
+{% endblock %}

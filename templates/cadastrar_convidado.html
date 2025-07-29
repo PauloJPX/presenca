@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block title %}Cadastrar Convidado{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Cadastrar Convidado</h2>
+
+    <form method="post" class="mt-4">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" name="nome" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="telefone" class="form-label">Telefone (xx)9999-9999  </label>
+            <input type="text" name="telefone" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="obs" class="form-label">Observações</label>
+            <textarea name="obs" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Cadastrar</button>
+        <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+<form method="post" action="{{ url_for('convidados.importar_convidados', evento_id=evento_id) }}" enctype="multipart/form-data" class="mt-5">
+    <div class="mb-3">
+        <label for="arquivo" class="form-label">Importar convidados (.txt com nome,telefone):</label>
+        <input type="file" name="arquivo" class="form-control" accept=".txt" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar Convidados</button>
+</form>
+
+{% endblock %}

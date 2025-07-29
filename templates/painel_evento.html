@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}{{ evento.nome_evento }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 text-center">
+    <h2>Painel do Evento</h2>
+    <h4 class="text-primary">{{ evento.nome_evento }}</h4>
+    
+
+    <p class="text-muted">Data: {{ evento.data_evento.strftime('%d/%m/%Y') }}</p>
+
+    <div class="d-grid gap-2 col-6 mx-auto mt-4">
+        <p class="text-muted">Funcionalidades em breve:</p>
+        <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento.id) }}" class="btn btn-primary">Cadastrar Convidado</a>
+        <a href="{{ url_for('convidados.listar_convidados', evento_id=evento.id) }}" class="btn btn-info">Consultar Lista</a>
+        <a href="{{ url_for('convidados.upload_convite', evento_id=evento.id) }}" class="btn btn-warning">Criar Convite</a>
+        {# <a href="{{ url_for('convidados.enviar_convite', evento_id=evento.id) }}" class="btn btn-success">Enviar Convite</a> #}
+    </div>
+
+    {% if evento.convite_path %}
+    <div class="mt-4">
+        <h5>Prévia do Convite:</h5>
+        <img src="{{ url_for('static', filename=evento.convite_path) }}"
+             class="img-fluid border rounded shadow"
+             style="max-width: 100%; max-height: 400px;">
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

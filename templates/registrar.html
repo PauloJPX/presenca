@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+<h3 class="text-center mb-4">Criar Nova Conta</h3>
+<form method="post" class="mx-auto" style="max-width: 400px;">
+    <input type="text" name="nome" placeholder="Nome" class="form-control mb-2" required>
+    <input type="email" name="email" placeholder="Email" class="form-control mb-2" required>
+    <input type="password" name="senha" placeholder="Senha" class="form-control mb-2" required>
+    <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+</form>
+{% if msg %}
+    <div class="alert alert-danger mt-3 text-center">{{ msg }}</div>
+{% endif %}
+{% endblock %}

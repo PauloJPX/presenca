@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+{% block title %}Confirmar Presença com Acompanhantes{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2>Olá {{ convidado.nome }}!</h2>
+    <p>Você foi convidado para o evento <strong>{{ evento.nome_evento }}</strong>.</p>
+
+    {% if evento.convite_path %}
+        <div class="my-4">
+            <h5>Convite:</h5>
+            <img src="{{ url_for('static', filename=evento.convite_path) }}" class="img-fluid" style="max-height: 400px;">
+        </div>
+    {% endif %}
+
+    <form method="post" class="mt-4">
+        <p>Você confirma sua presença?</p>
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button name="confirmacao" value="nao" type="submit" class="btn btn-danger">Não Poderei Ir</button>
+        </div>
+
+        <input type="hidden" name="confirmacao" value="sim">
+
+        <div id="acompanhantes-container">
+            <h5>Adicione acompanhantes</h5>
+            <div class="acompanhante-entry mb-3">
+                <input type="text" name="acompanhantes[]" placeholder="Nome do acompanhante" class="form-control mb-1" />
+                <input type="text" name="telefones[]" placeholder="Telefone do acompanhante" class="form-control mb-1" />
+                <input type="text" name="obs[]" placeholder="Observações" class="form-control" />
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary mb-3" onclick="adicionarAcompanhante()">Adicionar mais acompanhantes</button>
+        <br>
+        <button type="submit" class="btn btn-success">Confirmar Presença e Acompanhantes</button>
+    </form>
+</div>
+
+<script>
+function adicionarAcompanhante() {
+    const container = document.getElementById('acompanhantes-container');
+    const div = document.createElement('div');
+    div.classList.add('acompanhante-entry', 'mb-3');
+    div.innerHTML = `
+        <input type="text" name="acompanhantes[]" placeholder="Nome do acompanhante" class="form-control mb-1" />
+        <input type="text" name="telefones[]" placeholder="Telefone do acompanhante" class="form-control mb-1" />
+        <input type="text" name="obs[]" placeholder="Observações" class="form-control" />
+    `;
+    container.appendChild(div);
+}
+</script>
+{% endblock %}

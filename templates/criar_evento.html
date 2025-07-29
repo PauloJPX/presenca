@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Criar Evento{% endblock %}
+
+{% block content %}
+<h3 class="text-center mb-4">Novo Evento</h3>
+<form method="post" class="mx-auto" style="max-width: 400px;">
+    <div class="mb-3">
+        <label for="nome">Nome do Evento:</label>
+        <input type="text" name="nome" id="nome" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label for="data">Data do Evento:</label>
+        <input type="date" name="data" id="data" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label for="endereco">Endereço:</label>
+        <input type="text" name="endereco" id="endereco" class="form-control" required>
+    </div>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-success">Salvar Evento</button>
+        <a href="/eventos" class="btn btn-secondary mt-2">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

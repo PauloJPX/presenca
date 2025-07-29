@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block title %}Resultado da Importação{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="alert alert-info">
+        <h4>{{ mensagem }}</h4>
+    </div>
+    <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento_id) }}" class="btn btn-primary">OK</a>
+</div>
+{% endblock %}

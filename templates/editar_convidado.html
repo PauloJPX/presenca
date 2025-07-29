@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Editar Convidado{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Editar Convidado</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" name="nome" class="form-control" value="{{ convidado[0] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="telefone" class="form-label">Telefone</label>
+            <input type="text" name="telefone" class="form-control" value="{{ convidado[1] }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="obs" class="form-label">Observações</label>
+            <textarea name="obs" class="form-control">{{ convidado[2] }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{{ url_for('convidados.listar_convidados', evento_id=evento_id) }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'layout.html' %}
+{% block title %}Lista de Convidados{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Convidados do Evento {{ nome_evento or 'ID ' ~ evento_id }}</h2>
+
+    <!-- Filtro de status -->
+    <form method="get" class="mb-3 text-center">
+        <label for="filtro" class="me-2">Filtrar por status:</label>
+        <select name="filtro" id="filtro" onchange="this.form.submit()" class="form-select d-inline w-auto">
+            <option value="todos" {% if filtro == 'todos' %}selected{% endif %}>Todos</option>
+            <option value="confirmados" {% if filtro == 'confirmados' %}selected{% endif %}>Confirmados</option>
+            <option value="nao_confirmados" {% if filtro == 'nao_confirmados' %}selected{% endif %}>Não Confirmados</option>
+            <option value="recusados" {% if filtro == 'recusados' %}selected{% endif %}>Recusados</option>
+        </select>
+    </form>
+
+    <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento_id) }}" class="btn btn-success mb-3">Novo Convidado</a>
+
+    {% if convidados %}
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Observações</th>
+                    <th>Confirmado</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in convidados %}
+                <tr>
+                    <td>{{ c.nome }}</td>
+                    <td>{{ c.telefone }}</td>
+                    <td>{{ c.obs or '' }}</td>
+                    <td>
+                        {% if c.confirmado == 1 %}
+                            Sim (pelo dono)
+                        {% elif c.confirmado == 2 %}
+                            {% if c.origem %}
+                                Sim por {{ origem_por_id[c.origem] or 'convidado' }}
+                            {% else %}
+                                Sim por {{ c.nome }}
+                            {% endif %}
+                        {% elif c.confirmado == 3 %}
+                            Recusou
+                        {% else %}
+                            Ainda Não
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('convidados.editar_convidado', evento_id=evento_id, convidado_id=c.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <form method="post" action="{{ url_for('convidados.excluir_convidado', evento_id=evento_id, convidado_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este convidado?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                        </form>
+                        <form method="post" action="{{ url_for('convidados.confirmar_convidado', evento_id=evento_id, convidado_id=c.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-success"
+                             {% if c.confirmado != 0 %}disabled{% endif %}>
+                             Confirmar Presença
+                             </button>
+                        </form>
+                        {% if c.confirmado == 0 %}
+                          <a href="#" class="btn btn-sm btn-success"
+                            onclick='abrirModalConfirmacao("{{ c.telefone }}", "{{ c.nome }}", "{{ evento_id }}", "{{ c.id }}", "{{ nome_evento }}"); return false;'>
+                            Enviar Convite
+                         </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">Nenhum convidado encontrado.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">
+            Voltar
+        </a>
+    </div>
+</div>
+
+<!-- ✅ MODAL de confirmação -->
+<div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-labelledby="modalConfirmacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmacaoLabel">Enviar Convite</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="textoModal">Deseja permitir que o convidado adicione acompanhantes?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+        <button type="button" class="btn btn-success" id="btnSim">Sim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SCRIPT que controla o modal e WhatsApp -->
+<script>
+  let telefoneAtual = '';
+  let nomeAtual = '';
+  let eventoIdAtual = '';
+  let convidadoIdAtual = '';
+  let nomeEventoAtual = '';
+
+  function abrirModalConfirmacao(telefone, nome, eventoId, convidadoId, nomeEvento) {
+      telefoneAtual = telefone.replace(/\s+/g, '');
+      nomeAtual = nome;
+      eventoIdAtual = eventoId;
+      convidadoIdAtual = convidadoId;
+      nomeEventoAtual = nomeEvento;
+
+      let modal = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
+      modal.show();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+      const modalEl = document.getElementById('modalConfirmacao');
+
+      document.getElementById('btnSim').addEventListener('click', function () {
+          const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          modalInstance.hide();
+          let baseUrl = 'https://wa.me/55' + telefoneAtual;
+          let rootUrl = window.location.origin + '/';
+          let link = rootUrl + 'convidados/confirmar_com_acompanhantes/' + eventoIdAtual + '/' + convidadoIdAtual;
+          let mensagem = 'Olá ' + nomeAtual + ', você está convidado para o evento ' + nomeEventoAtual + '. Confirme presença e adicione acompanhantes aqui: ' + link;
+          window.open(baseUrl + '?text=' + encodeURIComponent(mensagem), '_blank');
+      });
+
+      document.querySelector('#modalConfirmacao .btn-secondary').addEventListener('click', function () {
+          const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          modalInstance.hide();
+          let baseUrl = 'https://wa.me/55' + telefoneAtual;
+          let rootUrl = window.location.origin + '/';
+          let link = rootUrl + 'convidados/confirmar/' + eventoIdAtual + '/' + convidadoIdAtual;
+          let mensagem = 'Olá ' + nomeAtual + ', você está convidado para o evento ' + nomeEventoAtual + '. Confirme presença aqui: ' + link;
+          window.open(baseUrl + '?text=' + encodeURIComponent(mensagem), '_blank');
+      });
+  });
+</script>
+{% endblock %}
