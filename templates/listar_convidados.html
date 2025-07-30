@@ -17,7 +17,6 @@
         </select>
     </form>
 
-
    <div class="d-flex justify-content-between mb-3">
     <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">
         ← Voltar
@@ -60,7 +59,7 @@
                             Ainda Não
                         {% endif %}
                     </td>
-                   <td>
+                    <td>
                         {% if c.cortesia %}
                             <span class="text-success">Sim</span>
                         {% else %}
@@ -69,21 +68,27 @@
                     </td>
 
                     <td>
-                        <a href="{{ url_for('convidados.editar_convidado', evento_id=evento_id, convidado_id=c.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <a href="{{ url_for('convidados.editar_convidado', evento_id=evento_id, convidado_id=c.id) }}" class="btn btn-sm btn-primary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
                         <form method="post" action="{{ url_for('convidados.excluir_convidado', evento_id=evento_id, convidado_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este convidado?');">
-                            <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </form>
+
                         <form method="post" action="{{ url_for('convidados.confirmar_convidado', evento_id=evento_id, convidado_id=c.id) }}" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-outline-success"
-                             {% if c.confirmado != 0 %}disabled{% endif %}>
-                             Confirmar Presença
-                             </button>
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Confirmar Presença" {% if c.confirmado != 0 %}disabled{% endif %}>
+                                <i class="bi bi-check2-circle"></i>
+                            </button>
                         </form>
+
                         {% if c.confirmado == 0 %}
-                          <a href="#" class="btn btn-sm btn-success"
-                            onclick='abrirModalConfirmacao("{{ c.telefone }}", "{{ c.nome }}", "{{ evento_id }}", "{{ c.id }}", "{{ nome_evento }}"); return false;'>
-                            Enviar Convite
-                         </a>
+                        <a href="#" class="btn btn-sm btn-success" title="Enviar Convite"
+                           onclick='abrirModalConfirmacao("{{ c.telefone }}", "{{ c.nome }}", "{{ evento_id }}", "{{ c.id }}", "{{ nome_evento }}"); return false;'>
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
                         {% endif %}
                     </td>
                 </tr>
@@ -93,8 +98,6 @@
     {% else %}
         <p class="text-muted">Nenhum convidado encontrado.</p>
     {% endif %}
-
-    
 </div>
 
 <!-- ✅ MODAL de confirmação -->
