@@ -37,6 +37,10 @@ def cadastrar_convidado(evento_id):
         
         obs = request.form['obs']
 
+        # 👇 Novo campo: checkbox cortesia
+        #cortesia = request.form.get('cortesia') == 'on'  # True se marcado, False se não
+        cortesia = 1 if request.form.get('cortesia') == 'on' else 0
+ 
         if not nome or not telefone:
             flash('Nome e telefone são obrigatórios.', 'danger')
             return redirect(url_for('convidados.cadastrar_convidado', evento_id=evento_id))
@@ -44,9 +48,9 @@ def cadastrar_convidado(evento_id):
         conexao = conectar()
         cursor = conexao.cursor()
         cursor.execute("""
-            INSERT INTO convidados (id_evento, nome, telefone, obs)
-            VALUES (%s, %s, %s, %s)
-        """, (evento_id, nome, telefone, obs))
+            INSERT INTO convidados (id_evento, nome, telefone, obs, cortesia)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (evento_id, nome, telefone, obs, cortesia))
         conexao.commit()
         cursor.close()
         conexao.close()
@@ -130,7 +134,7 @@ def listar_convidados(evento_id):
 
     # Montar consulta com base no filtro
     query = """
-        SELECT id, nome, telefone, obs, confirmado, origem
+        SELECT id, nome, telefone, obs, confirmado, origem,cortesia
         FROM convidados
         WHERE id_evento = %s
     """
@@ -142,6 +146,8 @@ def listar_convidados(evento_id):
         query += " AND (confirmado IS NULL OR confirmado = 0)"
     elif filtro == 'recusados':
        query += " AND confirmado = 3"
+    elif filtro == 'cortesia':
+        query += " AND cortesia = 1"
 
 
     query += " ORDER BY nome"
@@ -172,17 +178,19 @@ def listar_convidados(evento_id):
 @convidados_bp.route('/<int:evento_id>/editar/<int:convidado_id>', methods=['GET', 'POST'])
 def editar_convidado(evento_id, convidado_id):
     conexao = conectar()
-    cursor = conexao.cursor()
+    #cursor = conexao.cursor()
+    cursor = conexao.cursor(dictionary=True)
 
     if request.method == 'POST':
         nome = request.form['nome']
         telefone = request.form['telefone']
         obs = request.form['obs']
+        cortesia = 1 if request.form.get('cortesia') == 'on' else 0
         cursor.execute("""
             UPDATE convidados
-            SET nome = %s, telefone = %s, obs = %s
+            SET nome = %s, telefone = %s, obs = %s, cortesia = %s
             WHERE id = %s AND id_evento = %s
-        """, (nome, telefone, obs, convidado_id, evento_id))
+        """, (nome, telefone, obs,cortesia, convidado_id, evento_id))
         conexao.commit()
         cursor.close()
         conexao.close()
@@ -190,7 +198,7 @@ def editar_convidado(evento_id, convidado_id):
         return redirect(url_for('convidados.listar_convidados', evento_id=evento_id))
 
     cursor.execute("""
-        SELECT nome, telefone, obs
+        SELECT nome, telefone, obs, cortesia
         FROM convidados
         WHERE id = %s AND id_evento = %s 
     """, (convidado_id, evento_id))

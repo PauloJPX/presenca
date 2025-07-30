@@ -7,18 +7,27 @@
 
     <!-- Filtro de status -->
     <form method="get" class="mb-3 text-center">
-        <label for="filtro" class="me-2">Filtrar por status:</label>
+        <label for="filtro" class="me-2">Filtrar por:</label>
         <select name="filtro" id="filtro" onchange="this.form.submit()" class="form-select d-inline w-auto">
             <option value="todos" {% if filtro == 'todos' %}selected{% endif %}>Todos</option>
             <option value="confirmados" {% if filtro == 'confirmados' %}selected{% endif %}>Confirmados</option>
             <option value="nao_confirmados" {% if filtro == 'nao_confirmados' %}selected{% endif %}>Não Confirmados</option>
             <option value="recusados" {% if filtro == 'recusados' %}selected{% endif %}>Recusados</option>
+            <option value="cortesia" {% if filtro == 'cortesia' %}selected{% endif %}>Somente Cortesia</option>
         </select>
     </form>
 
-    <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento_id) }}" class="btn btn-success mb-3">Novo Convidado</a>
 
-    {% if convidados %}
+   <div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">
+        ← Voltar
+    </a>
+    <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento_id) }}" class="btn btn-success">
+        Novo Convidado
+    </a>
+   </div>
+
+   {% if convidados %}
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
@@ -26,6 +35,7 @@
                     <th>Telefone</th>
                     <th>Observações</th>
                     <th>Confirmado</th>
+                    <th>Cortesia</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -50,6 +60,14 @@
                             Ainda Não
                         {% endif %}
                     </td>
+                   <td>
+                        {% if c.cortesia %}
+                            <span class="text-success">Sim</span>
+                        {% else %}
+                            <span>Não</span>
+                        {% endif %}
+                    </td>
+
                     <td>
                         <a href="{{ url_for('convidados.editar_convidado', evento_id=evento_id, convidado_id=c.id) }}" class="btn btn-sm btn-primary">Editar</a>
                         <form method="post" action="{{ url_for('convidados.excluir_convidado', evento_id=evento_id, convidado_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este convidado?');">
@@ -76,11 +94,7 @@
         <p class="text-muted">Nenhum convidado encontrado.</p>
     {% endif %}
 
-    <div class="mt-4">
-        <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">
-            Voltar
-        </a>
-    </div>
+    
 </div>
 
 <!-- ✅ MODAL de confirmação -->

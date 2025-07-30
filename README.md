@@ -26,3 +26,13 @@ cd presenca
 python -m venv venv
 venv\Scripts\activate  # No Windows
 pip install -r requirements.txt
+presenca/
+├── app.py
+├── requirements.txt
+├── .gitignore
+├── static/
+├── templates/
+├── auth/           # Módulo de autenticação
+├── eventos/        # Módulo de eventos
+├── convidados/     # Módulo de convidados
+└── ...
