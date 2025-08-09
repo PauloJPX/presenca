@@ -21,6 +21,13 @@
     <a href="{{ url_for('convidados.painel_evento', evento_id=evento_id) }}" class="btn btn-secondary">
         ← Voltar
     </a>
+
+    <form method="get" action="{{ url_for('convidados.gerar_pdf_convidados', evento_id=evento_id) }}" target="_blank" style="display:inline;">
+       <input type="hidden" name="filtro" value="{{ filtro }}">
+       <button type="submit" class="btn btn-secondary">Gerar PDF</button>
+    </form>
+    
+
     <a href="{{ url_for('convidados.cadastrar_convidado', evento_id=evento_id) }}" class="btn btn-success">
         Novo Convidado
     </a>

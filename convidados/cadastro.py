@@ -2,7 +2,75 @@ from flask import render_template, request, redirect, url_for, flash, session
 from . import convidados_bp
 from models import conectar  # ajuste para seu projeto
 from utils import limpar_telefone_br  # ajuste para seu projeto
+###
+from flask import make_response
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
+@convidados_bp.route('/<int:evento_id>/listar/pdf')
+def gerar_pdf_convidados(evento_id):
+    filtro = request.args.get('filtro', 'todos')
+
+    convidados,origem, nome_evento = buscar_convidados(evento_id, filtro)
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    # Título
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, height - 50, f"Lista de Convidados - {nome_evento}")
+
+    # Cabeçalho da tabela
+    y = height - 80
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Nome")
+    p.drawString(250, y, "Cortesia")
+    p.drawString(330, y, "Confirmado")
+    p.drawString(430, y, "Assinatura")
+    y -= 20
+
+    p.setFont("Helvetica", 11)
+    for c in convidados:
+        if y < 50:
+            p.showPage()
+            y = height - 50
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Nome")
+            p.drawString(250, y, "Cortesia")
+            p.drawString(330, y, "Confirmado")
+            p.drawString(430, y, "Assinatura")
+            y -= 20
+            p.setFont("Helvetica", 11)
+
+        p.drawString(50, y, c['nome'])
+        p.drawString(250, y, "Sim" if c['cortesia'] == 1 else "Não")
+
+        status = {
+            None: "Não Confirmado",
+            0: "Não Confirmado",
+            1: "Confirmado",
+            2: "Confirmado",
+            3: "Recusou"
+        }
+        p.drawString(330, y, status.get(c['confirmado'], "Desconhecido"))
+
+        # Espaço para assinatura (linha)
+        p.line(430, y - 5, 530, y - 5)
+
+        y -= 20
+
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=convidados_{evento_id}.pdf'
+    return response
+
+###
 
 def pode_adicionar_convidado(evento_id):
     # Verifica se o plano do usuário é free
@@ -20,7 +88,6 @@ def pode_adicionar_convidado(evento_id):
 
     # Free: limite de 5 convidados
     return total < 5
-
 
 @convidados_bp.route('/<int:evento_id>/cadastrar', methods=['GET', 'POST'])
 def cadastrar_convidado(evento_id):
@@ -124,17 +191,13 @@ def importar_convidados(evento_id):
     return render_template('importacao_resultado.html', mensagem=mensagem, evento_id=evento_id)
 
 
-
-@convidados_bp.route('/<int:evento_id>/listar')
-def listar_convidados(evento_id):
-    filtro = request.args.get('filtro', 'todos')  # novo
-
+#sera usado para buscar convidados com base no filtro e sera usado no rendere_template e na impressão
+def buscar_convidados(evento_id, filtro='todos'):
     conexao = conectar()
     cursor = conexao.cursor(dictionary=True)
 
-    # Montar consulta com base no filtro
     query = """
-        SELECT id, nome, telefone, obs, confirmado, origem,cortesia
+        SELECT id, nome, telefone, obs, confirmado, origem, cortesia
         FROM convidados
         WHERE id_evento = %s
     """
@@ -145,32 +208,37 @@ def listar_convidados(evento_id):
     elif filtro == 'nao_confirmados':
         query += " AND (confirmado IS NULL OR confirmado = 0)"
     elif filtro == 'recusados':
-       query += " AND confirmado = 3"
+        query += " AND confirmado = 3"
     elif filtro == 'cortesia':
         query += " AND cortesia = 1"
 
-
     query += " ORDER BY nome"
-
     cursor.execute(query, params)
     convidados = cursor.fetchall()
 
-    # Criar dicionário com id -> nome
     origem_por_id = {c['id']: c['nome'] for c in convidados}
 
-    # Buscar nome do evento
+    # Agora busca o nome do evento aqui dentro
     cursor.execute("SELECT nome_evento FROM eventos WHERE id = %s", (evento_id,))
     evento = cursor.fetchone()
+    nome_evento = evento['nome_evento'] if evento else 'Evento desconhecido'
 
     cursor.close()
     conexao.close()
 
+    return convidados, origem_por_id, nome_evento
+
+@convidados_bp.route('/<int:evento_id>/listar')
+def listar_convidados(evento_id):
+    filtro = request.args.get('filtro', 'todos')
+    convidados, origem_por_id, nome_evento = buscar_convidados(evento_id, filtro)
+
     return render_template('listar_convidados.html',
                            convidados=convidados,
                            evento_id=evento_id,
-                           nome_evento=evento['nome_evento'],
+                           nome_evento=nome_evento,
                            origem_por_id=origem_por_id,
-                           filtro=filtro)  # novo
+                           filtro=filtro)
 
 
 

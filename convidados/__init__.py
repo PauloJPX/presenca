@@ -5,5 +5,5 @@ from . import cadastro
 from . import convite
 from . import confirmacao
 
- # from . import consulta
- # 
+
+
